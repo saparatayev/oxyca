@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Customer;
 use Illuminate\Http\Request;
+use Yajra\Datatables\Datatables;
 
 class CustomersController extends Controller
 {
@@ -14,6 +16,16 @@ class CustomersController extends Controller
     public function index()
     {
         return view('customers');
+    }
+
+    /**
+     * Process datatables ajax request.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function datatablesProducts()
+    {
+        return Datatables::of(Customer::query())->make(true);
     }
 
     /**

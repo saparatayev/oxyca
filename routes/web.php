@@ -3,6 +3,7 @@
 use App\Http\Controllers\CustomersController;
 use App\Http\Controllers\OrdersController;
 use App\Http\Controllers\ProductsController;
+use App\Models\Product;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -28,7 +29,10 @@ Route::middleware(['auth'])->group(function() {
     })->name('dashboard');
 
     Route::resource('products', ProductsController::class);
+
     Route::resource('customers', CustomersController::class);
+    Route::get('datatables-products', [CustomersController::class, 'datatablesProducts'])->name('datatables.products');
+
     Route::resource('orders', OrdersController::class);
 
 

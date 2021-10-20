@@ -7,13 +7,43 @@
 @stop
 
 @section('content')
-    <p>Welcome to Customers section.</p>
+    <table class="table table-bordered" id="customers-table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>FIO</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Created At</th>
+                <th>Updated At</th>
+            </tr>
+        </thead>
+    </table>
 @stop
 
 @section('css')
     <link rel="stylesheet" href="/css/admin_custom.css">
+    <link rel="stylesheet" href="//cdn.datatables.net/1.10.7/css/jquery.dataTables.min.css">
 @stop
 
 @section('js')
-    <script> console.log('Hi!'); </script>
+    <!-- DataTables -->
+    <script src="//cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>
+    <script>
+    $(function() {
+        $('#customers-table').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: "{!! route('datatables.products') !!}",
+            columns: [
+                { data: 'id', name: 'id' },
+                { data: 'fio', name: 'fio' },
+                { data: 'phone', name: 'phone' },
+                { data: 'email', name: 'email' },
+                { data: 'created_at', name: 'created_at' },
+                { data: 'updated_at', name: 'updated_at' }
+            ]
+        });
+    });
+    </script>
 @stop
