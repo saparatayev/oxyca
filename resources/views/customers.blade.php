@@ -7,43 +7,47 @@
 @stop
 
 @section('content')
-    <table class="table table-bordered" id="customers-table">
-        <thead>
+    {{-- Setup data for datatables --}}
+    @php
+        $heads = [
+            'ID',
+            'FIO',
+            'Phone',
+            'Email',
+            ['label' => 'Actions', 'no-export' => true, 'width' => 5],
+        ];
+
+        $btnEdit = '<a href="#" class="btn btn-xs btn-default text-primary mx-1 shadow" title="Edit">
+                        <i class="fa fa-lg fa-fw fa-pen"></i>
+                    </a>';
+        $btnDelete = '<a href="#" class="btn btn-xs btn-default text-danger mx-1 shadow" title="Delete">
+                        <i class="fa fa-lg fa-fw fa-trash"></i>
+                    </a>';
+        $config = [
+            'data' => $customers,
+            'order' => [[0, 'asc']],
+            'columns' => [null, null, null, null, ['orderable' => false]],
+        ];
+    @endphp
+
+    <x-adminlte-datatable id="table1" :heads="$heads">
+        @foreach($config['data'] as $customer)
             <tr>
-                <th>Id</th>
-                <th>FIO</th>
-                <th>Phone</th>
-                <th>Email</th>
-                <th>Created At</th>
-                <th>Updated At</th>
+                <td>{{ $customer->id }}</td>
+                <td>{{ $customer->fio }}</td>
+                <td>{{ $customer->phone }}</td>
+                <td>{{ $customer->email }}</td>
+                <td><nobr>{!! $btnEdit.$btnDelete !!}</nobr></td>
             </tr>
-        </thead>
-    </table>
+        @endforeach
+    </x-adminlte-datatable>
+
 @stop
 
 @section('css')
-    <link rel="stylesheet" href="/css/admin_custom.css">
-    <link rel="stylesheet" href="//cdn.datatables.net/1.10.7/css/jquery.dataTables.min.css">
+    
 @stop
 
 @section('js')
-    <!-- DataTables -->
-    <script src="//cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>
-    <script>
-    $(function() {
-        $('#customers-table').DataTable({
-            processing: true,
-            serverSide: true,
-            ajax: "{!! route('datatables.products') !!}",
-            columns: [
-                { data: 'id', name: 'id' },
-                { data: 'fio', name: 'fio' },
-                { data: 'phone', name: 'phone' },
-                { data: 'email', name: 'email' },
-                { data: 'created_at', name: 'created_at' },
-                { data: 'updated_at', name: 'updated_at' }
-            ]
-        });
-    });
-    </script>
+
 @stop
