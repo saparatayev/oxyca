@@ -14,21 +14,25 @@
             'Title',
             'SKU',
             'Price',
+            'Photo',
             ['label' => 'Actions', 'no-export' => true, 'width' => 5],
         ];
 
-        $btnEdit = '<a href="#" class="btn btn-xs btn-default text-primary mx-1 shadow" title="Edit">
-                        <i class="fa fa-lg fa-fw fa-pen"></i>
-                    </a>';
-        $btnDelete = '<a href="#" class="btn btn-xs btn-default text-danger mx-1 shadow" title="Delete">
-                        <i class="fa fa-lg fa-fw fa-trash"></i>
-                    </a>';
         $config = [
             'data' => $products,
             'order' => [[0, 'asc']],
             'columns' => [null, null, null, null, ['orderable' => false]],
         ];
     @endphp
+    
+    {{-- Success message --}}
+    @if(session('status'))
+        <div class="alert alert-success mt-3">
+            {{ session('status') }}
+        </div>
+    @endif
+
+    <a href="{{ route('products.create') }}" class="btn btn-success mb-3 shadow">New product</a>
 
     <x-adminlte-datatable id="table1" :heads="$heads">
         @foreach($config['data'] as $product)
@@ -37,7 +41,21 @@
                 <td>{{ $product->title }}</td>
                 <td>{{ $product->sku }}</td>
                 <td>{{ $product->price }}</td>
-                <td><nobr>{!! $btnEdit.$btnDelete !!}</nobr></td>
+                <td>
+                    @if($product->image)
+                        <img src="{{ $storageUrl . 'sm/' .  $product->image }}" alt="">
+                    @else
+                        No image
+                    @endif
+                </td>
+                <td><nobr>
+                    <a href="{{ route('products.edit', ['product' => $product]) }}" class="btn btn-xs btn-default text-primary mx-1 shadow" title="Edit">
+                        <i class="fa fa-lg fa-fw fa-pen"></i>
+                    </a>
+                    <a href="#" class="btn btn-xs btn-default text-danger mx-1 shadow" title="Delete">
+                        <i class="fa fa-lg fa-fw fa-trash"></i>
+                    </a>
+                </nobr></td>
             </tr>
         @endforeach
     </x-adminlte-datatable>

@@ -14,21 +14,24 @@
             'FIO',
             'Phone',
             'Email',
+            'Photo',
             ['label' => 'Actions', 'no-export' => true, 'width' => 5],
         ];
 
-        $btnEdit = '<a href="#" class="btn btn-xs btn-default text-primary mx-1 shadow" title="Edit">
-                        <i class="fa fa-lg fa-fw fa-pen"></i>
-                    </a>';
-        $btnDelete = '<a href="#" class="btn btn-xs btn-default text-danger mx-1 shadow" title="Delete">
-                        <i class="fa fa-lg fa-fw fa-trash"></i>
-                    </a>';
         $config = [
             'data' => $customers,
-            'order' => [[0, 'asc']],
-            'columns' => [null, null, null, null, ['orderable' => false]],
+            
         ];
     @endphp
+
+    {{-- Success message --}}
+    @if(session('status'))
+        <div class="alert alert-success mt-3">
+            {{ session('status') }}
+        </div>
+    @endif
+
+    <a href="{{ route('customers.create') }}" class="btn btn-success mb-3 shadow">New customer</a>
 
     <x-adminlte-datatable id="table1" :heads="$heads">
         @foreach($config['data'] as $customer)
@@ -37,7 +40,21 @@
                 <td>{{ $customer->fio }}</td>
                 <td>{{ $customer->phone }}</td>
                 <td>{{ $customer->email }}</td>
-                <td><nobr>{!! $btnEdit.$btnDelete !!}</nobr></td>
+                <td>
+                    @if($customer->image)
+                        <img src="{{ $storageUrl . 'sm/' .  $customer->image }}" alt="">
+                    @else
+                        No image
+                    @endif
+                </td>
+                <td><nobr>
+                    <a href="{{ route('customers.edit', ['customer' => $customer]) }}" class="btn btn-xs btn-default text-primary mx-1 shadow" title="Edit">
+                        <i class="fa fa-lg fa-fw fa-pen"></i>
+                    </a>
+                    <a href="#" class="btn btn-xs btn-default text-danger mx-1 shadow" title="Delete">
+                        <i class="fa fa-lg fa-fw fa-trash"></i>
+                    </a>
+                </nobr></td>
             </tr>
         @endforeach
     </x-adminlte-datatable>
