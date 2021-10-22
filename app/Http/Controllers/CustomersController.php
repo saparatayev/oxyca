@@ -26,8 +26,7 @@ class CustomersController extends Controller
     public function index()
     {
         return view('customers')->with([
-            'customers' => Customer::all(),
-            'storageUrl' => $this->storageUrl
+            'customers' => Customer::withCount('orders')->withSum('orders', 'total')->get(),
         ]);
     }
 

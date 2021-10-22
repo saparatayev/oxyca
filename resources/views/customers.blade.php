@@ -40,6 +40,8 @@
                 <td>{{ $customer->fio }}</td>
                 <td>{{ $customer->phone }}</td>
                 <td>{{ $customer->email }}</td>
+                <td>{{ $customer->orders_count }}</td>
+                <td>{{ $customer->orders_sum_total }}</td>
                 <td>
                     @if($customer->image)
                         <img src="{{ $storageUrl . 'sm/' .  $customer->image }}" alt="">
