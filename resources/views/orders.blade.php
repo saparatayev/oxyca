@@ -39,9 +39,13 @@
                     <a href="{{ route('orders.show', ['order' => $order]) }}" class="btn btn-xs btn-default text-primary mx-1 shadow" title="Show order">
                         <i class="fa fa-lg fa-fw fa-eye"></i>
                     </a>
-                    <a href="#" class="btn btn-xs btn-default text-danger mx-1 shadow" title="Delete">
-                        <i class="fa fa-lg fa-fw fa-trash"></i>
-                    </a>
+                    <form action="{{ route('orders.destroy', ['order' => $order]) }}" method="post" class="d-inline-block">
+                        @csrf
+                        {{ method_field('DELETE') }}
+                        <button class="btn btn-xs btn-default text-danger mx-1 shadow" type="submit">
+                            <i class="fa fa-lg fa-fw fa-trash"></i>
+                        </button>
+                    </form>
                 </nobr></td>
             </tr>
         @endforeach

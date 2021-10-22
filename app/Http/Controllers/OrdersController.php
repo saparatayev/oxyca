@@ -94,6 +94,15 @@ class OrdersController extends AdminController
      */
     public function destroy($id)
     {
-        //
+        $order = Order::with(['customer', 'products'])->find($id);
+        if(!$order) {
+            abort(404);
+        }
+
+        $order->products()->detach();
+        
+        $order->delete();
+
+        return redirect()->route('orders.index')->with('status', 'Deleted Order succesfully');
     }
 }
