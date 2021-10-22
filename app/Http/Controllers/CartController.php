@@ -208,7 +208,7 @@ class CartController extends AdminController
 
         $input = $request->all();
         $rules = [
-            'customer_id' => 'required|exists:products,id',
+            'customer_id' => 'required|exists:customers,id',
             'cart_count' => 'required|gt:0',
         ];
 
