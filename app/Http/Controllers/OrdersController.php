@@ -2,18 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
-class OrdersController extends Controller
+class OrdersController extends AdminController
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        return view('orders');
+        return view('orders')->with([
+            'cartCount' => $this->countItems($request),
+            'orders' => Order::with(['customer', 'products'])->get(),
+        ]);
     }
 
     /**
@@ -43,9 +48,19 @@ class OrdersController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
-        //
+        $order = Order::with(['customer', 'products'])->find($id);
+        if(!$order) {
+            abort(404);
+        }
+
+        return view('orders.show')->with([
+            'cartCount' => $this->countItems($request),
+            'storageUrlProducts' => Storage::url('products/sm/'),
+            'storageUrlCustomers' => Storage::url('customers/sm/'),
+            'order' => $order,
+        ]);
     }
 
     /**

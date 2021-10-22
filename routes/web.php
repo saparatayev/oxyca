@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\CustomersController;
 use App\Http\Controllers\OrdersController;
 use App\Http\Controllers\ProductsController;
@@ -32,8 +33,12 @@ Route::middleware(['auth'])->group(function() {
     Route::resource('customers', CustomersController::class);
     Route::resource('orders', OrdersController::class);
 
-
-    
+    Route::get('/cart',[CartController::class, 'index'])->name('cart.index');
+    Route::get('/cart/add-not-ajax/{id}/',[CartController::class, 'addToCartNotAjax'])->name('cart.not_ajax.add');
+    Route::get('/cart/add/{id}', [CartController::class, 'add'])->name('cart.add');
+    Route::get('/cart/delete/{id}',[CartController::class, 'delete']);
+    Route::get('/cart/subtract/{id}',[CartController::class, 'subtract']);
+    Route::post('/checkout', [CartController::class, 'checkout'])->name('checkout');
 });
 
 require __DIR__.'/auth.php';

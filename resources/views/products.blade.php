@@ -4,6 +4,7 @@
 
 @section('content_header')
     <h1>Products</h1>
+    <a href="{{ route('cart.index') }}">Cart (<span id="cart-count">{{ $cartCount }}</span>)</a>
 @stop
 
 @section('content')
@@ -49,6 +50,9 @@
                     @endif
                 </td>
                 <td><nobr>
+                    <a href="{{ route('cart.not_ajax.add', ['id' => $product->id]) }}" class="btn btn-xs btn-default text-primary mx-1 shadow " title="add-to-cart">
+                        <i class="fa fa-lg fa-fw fa-shopping-cart"></i>
+                    </a>
                     <a href="{{ route('products.edit', ['product' => $product]) }}" class="btn btn-xs btn-default text-primary mx-1 shadow" title="Edit">
                         <i class="fa fa-lg fa-fw fa-pen"></i>
                     </a>
@@ -66,5 +70,5 @@
 @stop
 
 @section('js')
-    
+    <script src="/js/addToCart.js"></script>
 @stop

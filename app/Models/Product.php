@@ -13,4 +13,9 @@ class Product extends Model
         'title', 'price', 'sku', 'image',
         'admin_created_id', 'admin_updated_id'
     ];
+
+    public function orders()
+    {
+        return $this->belongsToMany('App\Models\Order','orders_products');
+    }
 }

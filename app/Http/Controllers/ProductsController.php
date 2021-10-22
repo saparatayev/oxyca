@@ -10,7 +10,7 @@ use Intervention\Image\Facades\Image;
 use Config;
 use Illuminate\Filesystem\Filesystem;
 
-class ProductsController extends Controller
+class ProductsController extends AdminController
 {
     public $storageUrl;
 
@@ -23,11 +23,12 @@ class ProductsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         return view('products')->with([
             'products' => Product::all(),
-            'storageUrl' => $this->storageUrl
+            'storageUrl' => $this->storageUrl,
+            'cartCount'=>$this->countItems($request),
         ]);
     }
 

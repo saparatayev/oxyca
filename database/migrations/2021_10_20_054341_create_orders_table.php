@@ -19,6 +19,8 @@ class CreateOrdersTable extends Migration
             // foreign key
             $table->unsignedBigInteger('customer_id');
             $table->foreign('customer_id')->references('id')->on('customers');
+
+            $table->double('total', 10, 2);
             
             $table->timestamps();
         });

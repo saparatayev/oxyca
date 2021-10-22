@@ -13,4 +13,8 @@ class Customer extends Model
         'fio', 'phone', 'email', 'image',
         'admin_created_id', 'admin_updated_id'
     ];
+
+    public function orders() {
+        return $this->hasMany(Order::class);
+    }
 }

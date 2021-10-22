@@ -4,6 +4,7 @@
 
 @section('content_header')
     <h1>Customers</h1>
+    <a href="{{ route('cart.index') }}">Cart (<span id="cart-count">{{ $cartCount }}</span>)</a>
 @stop
 
 @section('content')
@@ -14,6 +15,8 @@
             'FIO',
             'Phone',
             'Email',
+            'Purchases',
+            'Purchases sum',
             'Photo',
             ['label' => 'Actions', 'no-export' => true, 'width' => 5],
         ];
