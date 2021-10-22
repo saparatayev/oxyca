@@ -29,6 +29,13 @@
         </div>
     @endif
 
+    {{-- Catch block 500 Server Error --}}
+    @if(session('error'))
+        <div class="alert alert-danger mt-3">
+            {{ session('error') }}
+        </div>
+    @endif
+
     <x-adminlte-datatable id="table1" :heads="$heads">
         @foreach($config['data'] as $order)
             <tr>

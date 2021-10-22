@@ -33,6 +33,13 @@
         </div>
     @endif
 
+    {{-- Catch block 500 Server Error --}}
+    @if(session('error'))
+        <div class="alert alert-danger mt-3">
+            {{ session('error') }}
+        </div>
+    @endif
+
     <a href="{{ route('products.create') }}" class="btn btn-success mb-3 shadow">New product</a>
 
     <x-adminlte-datatable id="table1" :heads="$heads">

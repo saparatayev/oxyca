@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
 use Config;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\DB;
 
 class CustomersController extends AdminController
 {
@@ -172,7 +173,7 @@ class CustomersController extends AdminController
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        // try {
+        try {
             if($request->hasFile('image')) {
                 $smImgDirectory = storage_path('app/public') . '/customers/sm';
                 $lgImgDirectory = storage_path('app/public') . '/customers/lg';
@@ -208,9 +209,9 @@ class CustomersController extends AdminController
             $customer->fill($input);
             $customer->update();
 
-        // } catch (\Throwable $th) {
-        //     return redirect()->back()->with('error','Customer editing error 500');
-        // }
+        } catch (\Throwable $th) {
+            return redirect()->back()->with('error','Customer editing error 500');
+        }
 
 
         return redirect()->route('customers.index')->with('status', 'Customer updated');
@@ -224,6 +225,37 @@ class CustomersController extends AdminController
      */
     public function destroy($id)
     {
-        //
+        $customer = Customer::with(['orders.products'])->find($id);
+        if(!$customer) {
+            abort(404);
+        }
+
+        DB::beginTransaction();
+        
+        try {
+            // deleting images
+            if ($customer->image) {
+                $smImgDirectory = storage_path('app/public') . '/customers/sm';
+                $lgImgDirectory = storage_path('app/public') . '/customers/lg';
+
+                app(Filesystem::class)->delete($smImgDirectory . '/' . $customer->image);
+                app(Filesystem::class)->delete($lgImgDirectory . '/' . $customer->image);
+            }
+
+            foreach($customer->orders as $ord) {
+                $ord->products()->detach();
+                $ord->delete();
+            }
+        
+            $customer->delete();
+
+        } catch (\Throwable $th) {
+            DB::rollback();
+            return redirect()->back()->with('error','Customer deleting error 500');
+        }
+
+        DB::commit();
+
+        return redirect()->route('customers.index')->with('status', 'Deleted Customer succesfully');
     }
 }

@@ -34,6 +34,13 @@
         </div>
     @endif
 
+    {{-- Catch block 500 Server Error --}}
+    @if(session('error'))
+        <div class="alert alert-danger mt-3">
+            {{ session('error') }}
+        </div>
+    @endif
+
     <a href="{{ route('customers.create') }}" class="btn btn-success mb-3 shadow">New customer</a>
 
     <x-adminlte-datatable id="table1" :heads="$heads">
@@ -56,9 +63,13 @@
                     <a href="{{ route('customers.edit', ['customer' => $customer]) }}" class="btn btn-xs btn-default text-primary mx-1 shadow" title="Edit">
                         <i class="fa fa-lg fa-fw fa-pen"></i>
                     </a>
-                    <a href="#" class="btn btn-xs btn-default text-danger mx-1 shadow" title="Delete">
-                        <i class="fa fa-lg fa-fw fa-trash"></i>
-                    </a>
+                    <form action="{{ route('customers.destroy', ['customer' => $customer]) }}" method="post" class="d-inline-block">
+                        @csrf
+                        {{ method_field('DELETE') }}
+                        <button class="btn btn-xs btn-default text-danger mx-1 shadow" type="submit">
+                            <i class="fa fa-lg fa-fw fa-trash"></i>
+                        </button>
+                    </form>
                 </nobr></td>
             </tr>
         @endforeach
