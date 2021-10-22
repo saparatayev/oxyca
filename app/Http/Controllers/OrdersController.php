@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class OrdersController extends AdminController
@@ -98,10 +99,19 @@ class OrdersController extends AdminController
         if(!$order) {
             abort(404);
         }
-
-        $order->products()->detach();
         
-        $order->delete();
+        DB::beginTransaction();
+        
+        try {
+            $order->products()->detach();
+        
+            $order->delete();
+        } catch (\Throwable $th) {
+            DB::rollback();
+            return redirect()->back()->with('error','Order deleting error 500');
+        }
+
+        DB::commit();
 
         return redirect()->route('orders.index')->with('status', 'Deleted Order succesfully');
     }

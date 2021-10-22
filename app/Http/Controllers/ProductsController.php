@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
 use Config;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\DB;
 
 class ProductsController extends AdminController
 {
@@ -219,6 +220,35 @@ class ProductsController extends AdminController
      */
     public function destroy($id)
     {
-        //
+        
+        $product = Product::with(['orders'])->find($id);
+        if(!$product) {
+            abort(404);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            // deleting images
+            if ($product->image) {
+                $smImgDirectory = storage_path('app/public') . '/products/sm';
+                $lgImgDirectory = storage_path('app/public') . '/products/lg';
+
+                app(Filesystem::class)->delete($smImgDirectory . '/' . $product->image);
+                app(Filesystem::class)->delete($lgImgDirectory . '/' . $product->image);
+            }
+
+            $product->orders()->detach();
+        
+            $product->delete();
+            
+        } catch (\Throwable $th) {
+            DB::rollback();
+            return redirect()->back()->with('error','Product deleting error 500');
+        }
+
+        DB::commit();
+
+        return redirect()->route('products.index')->with('status', 'Deleted Product succesfully');
     }
 }
