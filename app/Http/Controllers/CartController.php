@@ -32,6 +32,10 @@ class CartController extends AdminController
     public function add(Request $request,$id) {
         
         $id = intval($id);
+        $product = \App\Models\Product::find($id);
+        if (!$product) {
+            abort(404);
+        }
 
         $productsInCart = $this->getProductsFromCart($request);
 
@@ -49,11 +53,6 @@ class CartController extends AdminController
         $request->session()->put('products',$productsInCart);
 
         $totalPrice = $this->superGetTotalPrice($productsInCart);
-
-        $product = \App\Models\Product::find($id);
-        if (!$product) {
-            abort(404);
-        }
 
         return \Response::json([
             'cartCount'=>$this->countItems($request),
@@ -71,6 +70,10 @@ class CartController extends AdminController
      */
     public function addToCartNotAjax(Request $request,$id) {
         $id = intval($id);
+        $product = \App\Models\Product::find($id);
+        if (!$product) {
+            abort(404);
+        }
 
         $productsInCart = $this->getProductsFromCart($request);
 
@@ -88,11 +91,6 @@ class CartController extends AdminController
         $request->session()->put('products',$productsInCart);
 
         $totalPrice = $this->superGetTotalPrice($productsInCart);
-
-        $product = \App\Models\Product::find($id);
-        if (!$product) {
-            abort(404);
-        }
 
         return redirect()->route('cart.index');
     }

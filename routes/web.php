@@ -36,8 +36,8 @@ Route::middleware(['auth'])->group(function() {
     Route::get('/cart',[CartController::class, 'index'])->name('cart.index');
     Route::get('/cart/add-not-ajax/{id}/',[CartController::class, 'addToCartNotAjax'])->name('cart.not_ajax.add');
     Route::get('/cart/add/{id}', [CartController::class, 'add'])->name('cart.add');
-    Route::get('/cart/delete/{id}',[CartController::class, 'delete']);
-    Route::get('/cart/subtract/{id}',[CartController::class, 'subtract']);
+    Route::get('/cart/delete/{id}',[CartController::class, 'delete'])->name('cart.delete');
+    Route::get('/cart/subtract/{id}',[CartController::class, 'subtract'])->name('cart.subtract');
     Route::post('/checkout', [CartController::class, 'checkout'])->name('checkout');
 });
 
