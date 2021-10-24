@@ -14,7 +14,7 @@ class RegistrationTest extends TestCase
     {
         $response = $this->get('/register');
 
-        $response->assertStatus(200);
+        $response->assertStatus(404);
     }
 
     public function test_new_users_can_register()
@@ -26,7 +26,8 @@ class RegistrationTest extends TestCase
             'password_confirmation' => 'password',
         ]);
 
-        $this->assertAuthenticated();
-        $response->assertRedirect(RouteServiceProvider::HOME);
+        // $this->assertAuthenticated();
+        // $response->assertRedirect(RouteServiceProvider::HOME);
+        $response->assertStatus(404);
     }
 }
