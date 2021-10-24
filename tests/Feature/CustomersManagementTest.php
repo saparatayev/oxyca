@@ -68,7 +68,7 @@ class CustomersManagementTest extends TestCase
         // check stored images' height & width
         $this->assertTrue($lgImageDimensions[0] === Config::get('mysetting.user_image_lg_w'));
         $this->assertTrue($lgImageDimensions[1] === Config::get('mysetting.user_image_lg_h'));
-        $this->assertTrue($smImageDimensions[1] === Config::get('mysetting.user_image_sm_h'));
+        $this->assertTrue($smImageDimensions[1] === Config::get('mysetting.user_image_sm_w'));
         $this->assertTrue($smImageDimensions[1] === Config::get('mysetting.user_image_sm_h'));
     }
 
@@ -97,10 +97,10 @@ class CustomersManagementTest extends TestCase
         $this->assertCount(1, Customer::all());
         $customerAfterUpdating = Customer::first();
 
-        $this->assertTrue($customerAfterAdding->fio != $customerAfterUpdating);
-        $this->assertTrue($customerAfterAdding->phone != $customerAfterUpdating);
-        $this->assertTrue($customerAfterAdding->email != $customerAfterUpdating);
-        $this->assertTrue($customerAfterAdding->image != $customerAfterUpdating);
+        $this->assertTrue($customerAfterAdding->fio != $customerAfterUpdating->fio);
+        $this->assertTrue($customerAfterAdding->phone != $customerAfterUpdating->phone);
+        $this->assertTrue($customerAfterAdding->email != $customerAfterUpdating->email);
+        $this->assertTrue($customerAfterAdding->image != $customerAfterUpdating->image);
 
         $this->assertTrue($customerAfterUpdating->fio === 'John Does New Name');
         $this->assertTrue($customerAfterUpdating->phone === '+15555555555');
@@ -125,7 +125,7 @@ class CustomersManagementTest extends TestCase
         // check stored new images' height & width
         $this->assertTrue($lgImageDimensions[0] === Config::get('mysetting.user_image_lg_w'));
         $this->assertTrue($lgImageDimensions[1] === Config::get('mysetting.user_image_lg_h'));
-        $this->assertTrue($smImageDimensions[1] === Config::get('mysetting.user_image_sm_h'));
+        $this->assertTrue($smImageDimensions[1] === Config::get('mysetting.user_image_sm_w'));
         $this->assertTrue($smImageDimensions[1] === Config::get('mysetting.user_image_sm_h'));
             
         $response->assertRedirect(route('customers.index'));
