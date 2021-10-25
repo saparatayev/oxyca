@@ -57,7 +57,7 @@ class CustomersController extends AdminController
             /**
              * Telephone numbers in Canada 1 XXX XXX XXXX
              */
-            'phone' => 'required|unique:customers,phone|regex:/[+]{1}[1]{1}[0-9]{10}/',
+            'phone' => 'required|unique:customers,phone|regex:/^[+]{1}[1]{1}[0-9]{10}$/',
             'email' => 'required|unique:customers,email|email',
             'image' => 'required|max:5000|dimensions:min_width=300,min_height=300|mimes:jpg,png',
         ];

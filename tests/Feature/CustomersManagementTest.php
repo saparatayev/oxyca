@@ -167,17 +167,70 @@ class CustomersManagementTest extends TestCase
      */
     public function test_required_fields()
     {
-        $response = $this->actingAs(User::factory()->create())
-            ->post(route('customers.store'), [
-                'fio' => '',
-                'phone' => '',
-                'email' => '',
-                'image' => '',
-            ]);
+        $user = User::factory()->create();
+        $response = $this->storeCustomer($user, [
+            'fio' => '',
+            'phone' => '',
+            'email' => '',
+            'image' => '',
+        ]);
 
         $response->assertSessionHasErrors(['fio', 'phone', 'email', 'image']);
     }
+    
+    public function test_min_max_fields()
+    {
+        $user = User::factory()->create();
+        $this->storeCustomer($user, array_merge($this->data(), [
+            'fio' => 'k'
+        ]))->assertSessionHasErrors(['fio']);
 
+        $this->storeCustomer($user, array_merge($this->data(), [
+            'fio' => \Str::random(257)
+        ]))->assertSessionHasErrors(['fio']);
+    }
+
+    public function test_unique_fields()
+    {
+        $user = User::factory()->create();
+
+        $this->storeCustomer($user, $this->data());
+        $this->storeCustomer($user, $this->data())
+            ->assertSessionHasErrors(['phone', 'email']);
+    }
+
+    public function test_phone_regex()
+    {
+        $user = User::factory()->create();
+        $this->storeCustomer($user, array_merge($this->data(), [
+            'phone' => '+158'
+        ]))->assertSessionHasErrors(['phone']);
+        $this->storeCustomer($user, array_merge($this->data(), [
+            'phone' => '+dcdsec'
+        ]))->assertSessionHasErrors(['phone']);
+        $this->storeCustomer($user, array_merge($this->data(), [
+            'phone' => '458963214781681815'
+        ]))->assertSessionHasErrors(['phone']);
+    }
+
+    public function test_uploaded_image()
+    {
+        $user = User::factory()->create();
+        $this->storeCustomer($user, array_merge($this->data(), [
+            // width & height
+            'image' => UploadedFile::fake()->image('avatar.jpg', 100, 100)->size(2000)
+        ]))->assertSessionHasErrors(['image']);
+        
+        $this->storeCustomer($user, array_merge($this->data(), [
+            // size
+            'image' => UploadedFile::fake()->image('avatar.jpg', 300, 300)->size(5001)
+        ]))->assertSessionHasErrors(['image']);
+        
+        $this->storeCustomer($user, array_merge($this->data(), [
+            // format
+            'image' => UploadedFile::fake()->image('avatar.pdf', 1000)
+        ]))->assertSessionHasErrors(['image']);
+    }
 
     /**
      * An array of inputed customer's data.

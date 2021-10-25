@@ -54,7 +54,7 @@ class ProductsController extends AdminController
         $input = $request->all();
         $rules = [
             'title' => 'required|min:2|max:256',
-            'sku' => 'required|unique:products,sku|regex:/[0-9A-Z]{5}/',
+            'sku' => 'required|unique:products,sku|regex:/^[0-9A-Z]{5}$/',
             'price' => 'required|gt:0',
             'image' => 'required|max:5000|dimensions:min_width=300,min_height=300|mimes:jpg,png',
         ];

@@ -195,7 +195,8 @@ class CartManagementTest extends TestCase
         $this->get(route('cart.add', ['id' => $product->id]));
 
 
-        $response = $this->post(route('checkout'), [
+        $response = $this->actingAs($user)
+            ->post(route('checkout'), [
             'customer_id' => 1,
             'cart_count' => 1
         ]);
@@ -235,7 +236,8 @@ class CartManagementTest extends TestCase
         $this->get(route('cart.add', ['id' => $product1->id]));
         $this->get(route('cart.add', ['id' => $product2->id]));
 
-        $response = $this->post(route('checkout'), [
+        $response = $this->actingAs($user)
+            ->post(route('checkout'), [
             'customer_id' => $customer->id,
             'cart_count' => 3 // two times was added $product1 & one time $product2
         ]);
@@ -253,6 +255,52 @@ class CartManagementTest extends TestCase
 
         $response->assertSessionHas('products', []);
         $response->assertRedirect(route('orders.index'));
+    }
+
+    /**
+     * Validation testings
+     */
+    public function test_required_fields()
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)
+            ->post(route('checkout'), []);
+
+        $response->assertSessionHasErrors(['customer_id', 'cart_count']);
+    }
+
+    public function test_customer_exists_in_db()
+    {
+        $user = User::factory()->create();
+
+        $this->storeProduct($user, $this->data());
+        $this->storeCustomer($user, $this->dataOfCustomer());
+
+        $product = Product::first();
+
+        $this->get(route('cart.add', ['id' => $product->id]));
+
+        $this->actingAs($user)
+            ->post(route('checkout'), [
+            'customer_id' => 2,
+            'cart_count' => 1
+        ])->assertSessionHasErrors(['customer_id']);
+    }
+
+    public function test_items_quantity_in_cart_greater_than_zero()
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->post(route('checkout'), [
+            'cart_count' => 0
+        ])->assertSessionHasErrors(['cart_count']);
+
+        $this->actingAs($user)
+            ->post(route('checkout'), [
+            'cart_count' => -5
+        ])->assertSessionHasErrors(['cart_count']);
     }
 
     /**

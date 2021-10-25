@@ -178,6 +178,70 @@ class ProductsManagementTest extends TestCase
 
         $response->assertSessionHasErrors(['title', 'sku', 'price', 'image']);
     }
+
+    public function test_unique_fields()
+    {
+        $user = User::factory()->create();
+
+        $this->storeProduct($user, $this->data());
+        $this->storeProduct($user, $this->data())
+            ->assertSessionHasErrors(['sku']);
+    }
+
+    public function test_sku_regex()
+    {
+        $user = User::factory()->create();
+
+        $this->storeProduct($user, array_merge($this->data(), [
+            'sku' => 'df'
+        ]))->assertSessionHasErrors(['sku']);
+
+        $this->storeProduct($user, array_merge($this->data(), [
+            'sku' => '.ff54'
+        ]))->assertSessionHasErrors(['sku']);
+
+        $this->storeProduct($user, array_merge($this->data(), [
+            'sku' => 'aaaaaa'
+        ]))->assertSessionHasErrors(['sku']);
+
+        $this->storeProduct($user, array_merge($this->data(), [
+            'sku' => 'HDG'
+        ]))->assertSessionHasErrors(['sku']);
+    }
+
+    public function test_price()
+    {
+        $user = User::factory()->create();
+
+        $this->storeProduct($user, array_merge($this->data(), [
+            'price' => 0
+        ]))
+            ->assertSessionHasErrors(['price']);
+            
+        $this->storeProduct($user, array_merge($this->data(), [
+            'price' => -5
+        ]))
+            ->assertSessionHasErrors(['price']);
+    }
+
+    public function test_uploaded_image()
+    {
+        $user = User::factory()->create();
+        $this->storeProduct($user, array_merge($this->data(), [
+            // width & height
+            'image' => UploadedFile::fake()->image('product.jpg', 100, 100)->size(2000)
+        ]))->assertSessionHasErrors(['image']);
+        
+        $this->storeProduct($user, array_merge($this->data(), [
+            // size
+            'image' => UploadedFile::fake()->image('product.jpg', 300, 300)->size(5001)
+        ]))->assertSessionHasErrors(['image']);
+        
+        $this->storeProduct($user, array_merge($this->data(), [
+            // format
+            'image' => UploadedFile::fake()->image('product.pdf', 1000)
+        ]))->assertSessionHasErrors(['image']);
+    }
     
 
     /**
