@@ -3,12 +3,14 @@
 namespace Tests\Feature;
 
 use App\Models\Customer;
+use App\Models\Order;
 use App\Models\User;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -131,6 +133,50 @@ class CustomersManagementTest extends TestCase
         $response->assertRedirect(route('customers.index'));
     }
 
+    public function test_a_customer_can_be_deleted()
+    {
+        $user = User::factory()->create();
+
+        $this->storeCustomer($user, $this->data());
+        $customer = Customer::first();
+        
+        $response = $this->actingAs($user)
+            ->delete(route('customers.destroy', ['customer' => $customer]));
+        
+        $this->assertCount(0, Customer::all());
+
+        // check if images have been deleted
+        $this->assertTrue(!Storage::exists('customers/sm/' . $customer->image));
+        $this->assertTrue(!Storage::exists('customers/lg/' . $customer->image));
+
+        $response->assertRedirect(route('customers.index'));
+    }
+
+    public function test_a_customer_with_related_orders_can_be_deleted()
+    {
+        $user = User::factory()->create();
+
+        $this->storeProduct($user, $this->dataOfProduct());
+        
+        $this->storeCustomer($user, $this->data());
+        $customer = Customer::first();
+
+        $this->actingAs($user)
+            ->get(route('cart.add', ['id' => 1])); // 1 is $product->id
+
+        $this->actingAs($user)
+            ->post(route('checkout'), [
+                'customer_id' => 1,
+                'cart_count' => 1
+            ]);
+
+        $this->actingAs($user)
+            ->delete(route('customers.destroy', ['customer' => $customer]));
+
+        $this->assertCount(0, Order::all());
+        $this->assertCount(0, DB::table('orders_products')->get()); // check pivot
+    }
+
     /**
      * Validation testings
      */
@@ -146,7 +192,7 @@ class CustomersManagementTest extends TestCase
 
         $response->assertSessionHasErrors(['fio', 'phone', 'email', 'image']);
     }
-    
+
 
     /**
      * An array of inputed customer's data.
@@ -159,7 +205,54 @@ class CustomersManagementTest extends TestCase
             'fio' => 'John Doe',
             'phone' => '+14569631478',
             'email' => 'johndoe@mail.com',
-            'image' => 'avatar.jpg'
+            'image' => $this->fakeUploadFile('avatar.jpg')
         ];
+    }
+
+    /**
+     * An array of inputed product's data.
+     *
+     * @return Array
+     */
+    private function dataOfProduct()
+    {
+        return [
+            'title' => 'Lorem ipsum',
+            'sku' => 'JS6SY',
+            'price' => 126.23,
+            'image' => $this->fakeUploadFile('product.jpg')
+        ];
+    }
+
+    /**
+     * Helper for storing a product
+     * 
+     * @return void
+     */
+    private function storeProduct($user, $params)
+    {
+        $this->actingAs($user)
+            ->post(route('products.store'), $params);
+    }
+    
+    /**
+     * Helper for storing a customer
+     * 
+     * @return void
+     */
+    private function storeCustomer($user, $params)
+    {
+        $this->actingAs($user)
+            ->post(route('customers.store'), $params);
+    }
+
+    /**
+     * Fake file upload
+     * 
+     * @return UploadedFile
+     */
+    private function fakeUploadFile($filename)
+    {
+        return UploadedFile::fake()->image($filename, 300, 300)->size(2000);
     }
 }
