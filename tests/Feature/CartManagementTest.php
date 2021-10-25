@@ -210,6 +210,7 @@ class CartManagementTest extends TestCase
         $order = Order::first();
         $this->assertCount(1, Order::all());
         $this->assertCount(1, $order->products()->get());
+        $this->assertTrue($order->products()->first()->pivot->quantity === 1); // check pivot column
         $this->assertTrue($order->total === floatval(number_format(1 * $product->price, 2, '.', '')));
         $this->assertTrue($order->customer_id === 1);
 
@@ -246,8 +247,13 @@ class CartManagementTest extends TestCase
         ]);
 
         $order = Order::first();
+        $firstProductInOrder = $order->products()->first();
+        $secondProductInOrder = $order->products()->orderBy('id', 'desc')->first();
+
         $this->assertCount(1, Order::all());
         $this->assertCount(2, $order->products()->get()); // two different types of products
+        $this->assertTrue($firstProductInOrder->pivot->quantity === 2); // check pivot column
+        $this->assertTrue($secondProductInOrder->pivot->quantity === 1); // check pivot column
         $this->assertTrue($order->total === floatval(number_format(2 * $product1->price + 1 * $product2->price, 2, '.', '')));
         $this->assertTrue($order->customer_id === 1);
 

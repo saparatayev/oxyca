@@ -238,7 +238,12 @@ class ProductsController extends AdminController
                 app(Filesystem::class)->delete($lgImgDirectory . '/' . $product->image);
             }
 
-            $product->orders()->detach();
+            // $product->orders()->detach();
+            // $product->orders()->delete();
+            foreach($product->orders as $ord) {
+                $ord->products()->detach();
+                $ord->delete();
+            }
         
             $product->delete();
             
