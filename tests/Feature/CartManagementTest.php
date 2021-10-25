@@ -4,7 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Product;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Session;
@@ -12,7 +12,15 @@ use Tests\TestCase;
 
 class CartManagementTest extends TestCase
 {
-    use RefreshDatabase;
+    /**
+     * RefreshDatabase doesn't work properly.
+     * It stores data between tests, causing tests to fail.
+     * For example php artisan test --filter test_several_products_with_different_quantities_can_be_checked_out --env=testing PASSES
+     * BUT
+     * php artisan test --env=testing FAILS
+     * That's why use DatabaseMigrations instead of RefreshDatabase
+     */
+    use DatabaseMigrations;
 
     public function test_a_product_can_be_added_to_cart()
     {
