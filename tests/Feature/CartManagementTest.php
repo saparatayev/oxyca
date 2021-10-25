@@ -2,25 +2,18 @@
 
 namespace Tests\Feature;
 
+use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
 
 class CartManagementTest extends TestCase
 {
-    /**
-     * RefreshDatabase doesn't work properly.
-     * It stores data between tests, causing tests to fail.
-     * For example php artisan test --filter test_several_products_with_different_quantities_can_be_checked_out --env=testing PASSES
-     * BUT
-     * php artisan test --env=testing FAILS
-     * That's why use DatabaseMigrations instead of RefreshDatabase
-     */
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     public function test_a_product_can_be_added_to_cart()
     {
@@ -233,6 +226,7 @@ class CartManagementTest extends TestCase
             'image' => $this->fakeUploadFile('product2.jpg')
         ]));
 
+        $customer = Customer::first();
         $product1 = Product::first();
         $product2 = Product::orderBy('id', 'desc')->first();
 
@@ -242,7 +236,7 @@ class CartManagementTest extends TestCase
         $this->get(route('cart.add', ['id' => $product2->id]));
 
         $response = $this->post(route('checkout'), [
-            'customer_id' => 1,
+            'customer_id' => $customer->id,
             'cart_count' => 3 // two times was added $product1 & one time $product2
         ]);
 
@@ -255,7 +249,7 @@ class CartManagementTest extends TestCase
         $this->assertTrue($firstProductInOrder->pivot->quantity === 2); // check pivot column
         $this->assertTrue($secondProductInOrder->pivot->quantity === 1); // check pivot column
         $this->assertTrue($order->total === floatval(number_format(2 * $product1->price + 1 * $product2->price, 2, '.', '')));
-        $this->assertTrue($order->customer_id === 1);
+        $this->assertTrue($order->customer_id === $customer->id);
 
         $response->assertSessionHas('products', []);
         $response->assertRedirect(route('orders.index'));

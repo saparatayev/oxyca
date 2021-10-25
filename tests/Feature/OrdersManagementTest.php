@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Models\Customer;
 use App\Models\Order;
+use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -16,6 +18,7 @@ class OrdersManagementTest extends TestCase
 
     public function test_an_order_can_be_deleted()
     {
+        $this->withExceptionHandling();
         $user = User::factory()->create();
 
         $this->storeProduct($user, $this->data());
@@ -23,11 +26,11 @@ class OrdersManagementTest extends TestCase
         $this->storeCustomer($user, $this->dataOfCustomer());
 
         $this->actingAs($user)
-            ->get(route('cart.add', ['id' => 1])); // 1 is $product->id
+            ->get(route('cart.add', ['id' => Product::first()->id])); // 1 is $product->id
 
         $this->actingAs($user)
             ->post(route('checkout'), [
-                'customer_id' => 1,
+                'customer_id' => Customer::first()->id,
                 'cart_count' => 1
             ]);
 

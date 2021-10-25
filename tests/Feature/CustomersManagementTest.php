@@ -6,7 +6,6 @@ use App\Models\Customer;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Filesystem\Filesystem;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Http\UploadedFile;
@@ -17,15 +16,7 @@ use Tests\TestCase;
 
 class CustomersManagementTest extends TestCase
 {
-    /**
-     * RefreshDatabase doesn't work properly.
-     * It stores data between tests, causing tests to fail.
-     * For example php artisan test --filter test_several_products_with_different_quantities_can_be_checked_out --env=testing PASSES
-     * BUT
-     * php artisan test --env=testing FAILS
-     * That's why use DatabaseMigrations instead of RefreshDatabase
-     */
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     public function test_a_customer_can_be_added()
     {
