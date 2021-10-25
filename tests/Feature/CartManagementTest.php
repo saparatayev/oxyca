@@ -2,12 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Session;
 use Tests\TestCase;
 
 class CartManagementTest extends TestCase
@@ -71,11 +71,6 @@ class CartManagementTest extends TestCase
 
     public function test_different_products_can_be_added_to_cart()
     {
-        $this->withoutExceptionHandling();
-
-        $file1 = $this->fakeUploadFile('product1.jpg');
-        $file2 = $this->fakeUploadFile('product2.jpg');
-
         $user = User::factory()->create();
 
         $this->storeProduct($user, $this->data());
@@ -167,8 +162,6 @@ class CartManagementTest extends TestCase
 
     public function test_product_can_be_deleted_from_cart()
     {
-        $file2 = $this->fakeUploadFile('product2.jpg');
-
         $user = User::factory()->create();
 
         $this->storeProduct($user, $this->data()); // first product
@@ -197,6 +190,71 @@ class CartManagementTest extends TestCase
         ], $strict = false);
     }
 
+    public function test_products_in_cart_can_be_checked_out()
+    {
+        $user = User::factory()->create();
+
+        $this->storeProduct($user, $this->data());
+        $this->storeCustomer($user, $this->dataOfCustomer());
+
+        $product = Product::first();
+
+        $this->get(route('cart.add', ['id' => $product->id]));
+
+
+        $response = $this->post(route('checkout'), [
+            'customer_id' => 1,
+            'cart_count' => 1
+        ]);
+
+        $order = Order::first();
+        $this->assertCount(1, Order::all());
+        $this->assertCount(1, $order->products()->get());
+        $this->assertTrue($order->total === floatval(number_format(1 * $product->price, 2, '.', '')));
+        $this->assertTrue($order->customer_id === 1);
+
+        $response->assertSessionHas('products', []);
+        $response->assertRedirect(route('orders.index'));
+    }
+
+    public function test_several_products_with_different_quantities_can_be_checked_out()
+    {
+        $this->withExceptionHandling();
+
+        $user = User::factory()->create();
+
+        $this->storeCustomer($user, $this->dataOfCustomer());
+        $this->storeProduct($user, $this->data());
+        $this->storeProduct($user, array_merge($this->data(), [ // second product
+            'title' => 'Lorem ipsum 2',
+            'sku' => 'HDV7T',
+            'price' => 459.36,
+            'image' => $this->fakeUploadFile('product2.jpg')
+        ]));
+
+        $product1 = Product::first();
+        $product2 = Product::orderBy('id', 'desc')->first();
+
+        // two times was added $product1 & one time $product2
+        $this->get(route('cart.add', ['id' => $product1->id]));
+        $this->get(route('cart.add', ['id' => $product1->id]));
+        $this->get(route('cart.add', ['id' => $product2->id]));
+
+        $response = $this->post(route('checkout'), [
+            'customer_id' => 1,
+            'cart_count' => 3 // two times was added $product1 & one time $product2
+        ]);
+
+        $order = Order::first();
+        $this->assertCount(1, Order::all());
+        $this->assertCount(2, $order->products()->get()); // two different types of products
+        $this->assertTrue($order->total === floatval(number_format(2 * $product1->price + 1 * $product2->price, 2, '.', '')));
+        $this->assertTrue($order->customer_id === 1);
+
+        $response->assertSessionHas('products', []);
+        $response->assertRedirect(route('orders.index'));
+    }
+
     /**
      * An array of inputed product's data.
      *
@@ -213,6 +271,21 @@ class CartManagementTest extends TestCase
     }
 
     /**
+     * An array of inputed customer's data.
+     *
+     * @return Array
+     */
+    private function dataOfCustomer()
+    {
+        return [
+            'fio' => 'John Doe',
+            'phone' => '+15896321478',
+            'email' => 'johndoe@mail.com',
+            'image' => $this->fakeUploadFile('avatar.jpg')
+        ];
+    }
+
+    /**
      * Helper for storing a product
      * 
      * @return void
@@ -221,6 +294,17 @@ class CartManagementTest extends TestCase
     {
         $this->actingAs($user)
             ->post(route('products.store'), $params);
+    }
+    
+    /**
+     * Helper for storing a customer
+     * 
+     * @return void
+     */
+    private function storeCustomer($user, $params)
+    {
+        $this->actingAs($user)
+            ->post(route('customers.store'), $params);
     }
 
     /**
