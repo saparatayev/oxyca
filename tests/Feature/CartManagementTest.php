@@ -70,15 +70,13 @@ class CartManagementTest extends TestCase
 
         $user = User::factory()->create();
 
-        $this->storeProduct($user, array_merge($this->data(), [
-            'image' => $file1
-        ]));
+        $this->storeProduct($user, $this->data());
 
         $this->storeProduct($user, array_merge($this->data(), [
                 'title' => 'Lorem ipsum 2',
                 'sku' => 'HDV7T',
                 'price' => 459.36,
-                'image' => $file2
+                'image' => $this->fakeUploadFile('product2.jpg')
             ]));
 
         $this->assertCount(2, Product::all());
@@ -171,7 +169,7 @@ class CartManagementTest extends TestCase
                 'title' => 'Lorem ipsum 2',
                 'sku' => 'HDV7T',
                 'price' => 459.36,
-                'image' => $file2
+                'image' => $this->fakeUploadFile('product2.jpg')
             ]));
 
         $product1 = Product::first();
@@ -209,7 +207,7 @@ class CartManagementTest extends TestCase
     /**
      * Helper for storing a product
      * 
-     * @return Product
+     * @return void
      */
     private function storeProduct($user, $params)
     {
