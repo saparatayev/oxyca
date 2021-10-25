@@ -29,14 +29,9 @@ class CustomersManagementTest extends TestCase
 
     public function test_a_customer_can_be_added()
     {
-        $this->withoutExceptionHandling();
+        $user = User::factory()->create();
 
-        $file = UploadedFile::fake()->image('avatar.jpg', 300, 300)->size(2000);
-
-        $response = $this->actingAs($user = User::factory()->create())
-            ->post(route('customers.store'), array_merge($this->data(), [
-                'image' => $file
-            ]));
+        $response = $this->storeCustomer($user, $this->data());
 
         // check admin_created_id & admin_updated_id fields
         $customer = Customer::first();
@@ -50,18 +45,13 @@ class CustomersManagementTest extends TestCase
 
     public function test_neccessary_folders_created_and_images_stored()
     {
-        $this->withoutExceptionHandling();
-
-        $file = UploadedFile::fake()->image('avatar.jpg', 300, 300)->size(2000);
+        $user = User::factory()->create();
 
         $fileSystem = new Filesystem();
         $smImgDirectory = storage_path('app/public') . '/customers/sm';
         $lgImgDirectory = storage_path('app/public') . '/customers/lg';
 
-        $this->actingAs(User::factory()->create())
-            ->post(route('customers.store'), array_merge($this->data(), [
-                'image' => $file
-            ]));
+        $this->storeCustomer($user, $this->data());
         
         $customer = Customer::first();
         
@@ -85,25 +75,20 @@ class CustomersManagementTest extends TestCase
 
     public function test_a_customer_can_be_updated()
     {
-        $this->withoutExceptionHandling();
+        $user = User::factory()->create();
 
         // first add a customer
-        $file = UploadedFile::fake()->image('avatar.jpg', 300, 300)->size(2000);
-        $this->actingAs($user = User::factory()->create())
-            ->post(route('customers.store'), array_merge($this->data(), [
-                'image' => $file
-            ]));
+        $this->storeCustomer($user, $this->data());
         $this->assertCount(1, Customer::all());
         $customerAfterAdding = Customer::first();
 
         // then update a customer
-        $file = UploadedFile::fake()->image('new_avatar.jpg', 300, 300)->size(2000);
         $response = $this->actingAs($user)
             ->put(route('customers.update', ['customer' => $customerAfterAdding]), [
                 'fio' => 'John Does New Name',
                 'phone' => '+15555555555',
                 'email' => 'johndoe_new_email@mail.com',
-                'image' => $file
+                'image' => $this->fakeUploadFile('new_avatar.jpg')
             ]);
         $this->assertCount(1, Customer::all());
         $customerAfterUpdating = Customer::first();
@@ -247,11 +232,11 @@ class CustomersManagementTest extends TestCase
     /**
      * Helper for storing a customer
      * 
-     * @return void
+     * @return $response
      */
     private function storeCustomer($user, $params)
     {
-        $this->actingAs($user)
+        return $this->actingAs($user)
             ->post(route('customers.store'), $params);
     }
 

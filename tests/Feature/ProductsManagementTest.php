@@ -20,14 +20,9 @@ class ProductsManagementTest extends TestCase
 
     public function test_a_product_can_be_added()
     {
-        $this->withoutExceptionHandling();
+        $user = User::factory()->create();
 
-        $file = UploadedFile::fake()->image('product.jpg', 300, 300)->size(2000);
-
-        $response = $this->actingAs($user = User::factory()->create())
-            ->post(route('products.store'), array_merge($this->data(), [
-                'image' => $file
-            ]));
+        $response = $this->storeProduct($user, $this->data());
 
         // check admin_created_id & admin_updated_id fields
         $product = Product::first();
@@ -41,19 +36,14 @@ class ProductsManagementTest extends TestCase
 
     public function test_neccessary_folders_created_and_images_stored()
     {
-        $this->withoutExceptionHandling();
+        $user = User::factory()->create();
 
-        $file = UploadedFile::fake()->image('avatar.jpg', 300, 300)->size(2000);
+        $this->storeProduct($user, $this->data());
 
         $fileSystem = new Filesystem();
         $smImgDirectory = storage_path('app/public') . '/products/sm';
         $lgImgDirectory = storage_path('app/public') . '/products/lg';
 
-        $this->actingAs(User::factory()->create())
-            ->post(route('products.store'), array_merge($this->data(), [
-                'image' => $file
-            ]));
-        
         $product = Product::first();
         
         // check if folders have been created
@@ -76,25 +66,20 @@ class ProductsManagementTest extends TestCase
 
     public function test_a_product_can_be_updated()
     {
-        $this->withoutExceptionHandling();
+        $user = User::factory()->create();
 
         // first add a product
-        $file = UploadedFile::fake()->image('product.jpg', 300, 300)->size(2000);
-        $this->actingAs($user = User::factory()->create())
-            ->post(route('products.store'), array_merge($this->data(), [
-                'image' => $file
-            ]));
+        $this->storeProduct($user, $this->data());
         $this->assertCount(1, Product::all());
         $productAfterAdding = Product::first();
 
         // then update a product
-        $file = UploadedFile::fake()->image('new_product.jpg', 300, 300)->size(2000);
         $response = $this->actingAs($user)
             ->put(route('products.update', ['product' => $productAfterAdding]), [
                 'title' => 'Lorem ipsum New Title',
                 'sku' => 'BSY88',
                 'price' => 259.36,
-                'image' => $file
+                'image' => $this->fakeUploadFile('new_product.jpg')
             ]);
         $this->assertCount(1, Product::all());
         $productAfterUpdating = Product::first();
@@ -182,13 +167,14 @@ class ProductsManagementTest extends TestCase
      */
     public function test_required_fields()
     {
-        $response = $this->actingAs(User::factory()->create())
-            ->post(route('products.store'), [
-                'title' => '',
-                'sku' => '',
-                'price' => '',
-                'image' => ''
-            ]);
+        $user = User::factory()->create();
+
+        $response = $this->storeProduct($user, [
+            'title' => '',
+            'sku' => '',
+            'price' => '',
+            'image' => ''
+        ]);
 
         $response->assertSessionHasErrors(['title', 'sku', 'price', 'image']);
     }
@@ -227,11 +213,11 @@ class ProductsManagementTest extends TestCase
     /**
      * Helper for storing a product
      * 
-     * @return void
+     * @return $response
      */
     private function storeProduct($user, $params)
     {
-        $this->actingAs($user)
+        return $this->actingAs($user)
             ->post(route('products.store'), $params);
     }
     
