@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Notifications\OrderSaved;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -242,6 +243,8 @@ class CartController extends AdminController
             foreach($products as $p) {
                 $order->products()->attach($p->id, ['quantity' => $productsInCart[$p->id]]);
             }
+
+            auth()->user()->notify(new OrderSaved($order));
 
             $this->clear($request);
 
