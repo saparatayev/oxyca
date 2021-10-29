@@ -222,7 +222,9 @@ class ProductsController extends AdminController
     {
         $product = Product::with(['orders'])->find($id);
 
-        if(auth()->user()->can('delete', $product)) {
+        $this->authorize('delete', $product);
+
+        // if(auth()->user()->can('delete', $product)) {
             
             if(!$product) {
                 abort(404);
@@ -258,9 +260,9 @@ class ProductsController extends AdminController
 
             return redirect()->route('products.index')->with('status', 'Deleted Product succesfully');
             
-        } else {
-            return redirect()->route('products.index')->with('error', 'Forbidden 403');
-        }
+        // } else {
+        //     return redirect()->route('products.index')->with('error', 'Forbidden 403');
+        // }
     
     }
 }
