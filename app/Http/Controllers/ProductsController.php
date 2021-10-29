@@ -218,11 +218,11 @@ class ProductsController extends AdminController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Product $product)
+    public function destroy($id)
     {
-        if(auth()->user()->can('delete', $product)) {
+        $product = Product::with(['orders'])->find($id);
 
-            $product = Product::with(['orders'])->find($product);
+        if(auth()->user()->can('delete', $product)) {
             
             if(!$product) {
                 abort(404);
