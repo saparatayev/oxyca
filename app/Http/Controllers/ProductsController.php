@@ -218,42 +218,49 @@ class ProductsController extends AdminController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Product $product)
     {
-        
-        $product = Product::with(['orders'])->find($id);
-        if(!$product) {
-            abort(404);
-        }
+        if(auth()->user()->can('delete', $product)) {
 
-        DB::beginTransaction();
-
-        try {
-            // deleting images
-            if ($product->image) {
-                $smImgDirectory = storage_path('app/public') . '/products/sm';
-                $lgImgDirectory = storage_path('app/public') . '/products/lg';
-
-                app(Filesystem::class)->delete($smImgDirectory . '/' . $product->image);
-                app(Filesystem::class)->delete($lgImgDirectory . '/' . $product->image);
-            }
-
-            // $product->orders()->detach();
-            // $product->orders()->delete();
-            foreach($product->orders as $ord) {
-                $ord->products()->detach();
-                $ord->delete();
-            }
-        
-            $product->delete();
+            $product = Product::with(['orders'])->find($product);
             
-        } catch (\Throwable $th) {
-            DB::rollback();
-            return redirect()->back()->with('error','Product deleting error 500');
+            if(!$product) {
+                abort(404);
+            }
+
+            DB::beginTransaction();
+
+            try {
+                // deleting images
+                if ($product->image) {
+                    $smImgDirectory = storage_path('app/public') . '/products/sm';
+                    $lgImgDirectory = storage_path('app/public') . '/products/lg';
+
+                    app(Filesystem::class)->delete($smImgDirectory . '/' . $product->image);
+                    app(Filesystem::class)->delete($lgImgDirectory . '/' . $product->image);
+                }
+
+                // $product->orders()->detach();
+                // $product->orders()->delete();
+                foreach($product->orders as $ord) {
+                    $ord->products()->detach();
+                    $ord->delete();
+                }
+            
+                $product->delete();
+                
+            } catch (\Throwable $th) {
+                DB::rollback();
+                return redirect()->back()->with('error','Product deleting error 500');
+            }
+
+            DB::commit();    
+
+            return redirect()->route('products.index')->with('status', 'Deleted Product succesfully');
+            
+        } else {
+            return redirect()->route('products.index')->with('error', 'Forbidden 403');
         }
-
-        DB::commit();
-
-        return redirect()->route('products.index')->with('status', 'Deleted Product succesfully');
+    
     }
 }
