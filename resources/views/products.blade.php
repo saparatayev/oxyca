@@ -44,7 +44,7 @@
 
     <x-adminlte-datatable id="table1" :heads="$heads">
         @foreach($config['data'] as $product)
-        @can('view-any', $product)
+        @can('view', $product)
             <tr>
                 <td>{{ $product->id }}</td>
                 <td>{{ $product->title }}</td>
