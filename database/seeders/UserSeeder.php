@@ -18,5 +18,11 @@ class UserSeeder extends Seeder
             'email' => 'adming@gmail.com',
             'password' => \Hash::make('12121212'),
         ]);
+        
+        \DB::table('users')->insert([
+            'name' => 'Admin Jr. Admin',
+            'email' => 'adminjunior@gmail.com',
+            'password' => \Hash::make('12121212'),
+        ]);
     }
 }

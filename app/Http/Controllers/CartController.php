@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Models\User;
 use App\Notifications\OrderSaved;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -244,7 +246,8 @@ class CartController extends AdminController
                 $order->products()->attach($p->id, ['quantity' => $productsInCart[$p->id]]);
             }
 
-            auth()->user()->notify(new OrderSaved($order));
+            // auth()->user()->notify(new OrderSaved($order)); // send to one user
+            Notification::send(User::all(), new OrderSaved($order));
 
             $this->clear($request);
 
