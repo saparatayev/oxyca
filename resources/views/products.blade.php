@@ -64,6 +64,7 @@
                     <a href="{{ route('products.edit', ['product' => $product]) }}" class="btn btn-xs btn-default text-primary mx-1 shadow" title="Edit">
                         <i class="fa fa-lg fa-fw fa-pen"></i>
                     </a>
+                    @can('delete', $product)
                     <form action="{{ route('products.destroy', ['product' => $product]) }}" method="post" class="d-inline-block">
                         @csrf
                         {{ method_field('DELETE') }}
@@ -71,6 +72,7 @@
                             <i class="fa fa-lg fa-fw fa-trash"></i>
                         </button>
                     </form>
+                    @endcan
                 </nobr></td>
             </tr>
         @endcan
