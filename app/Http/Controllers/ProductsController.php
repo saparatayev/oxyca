@@ -17,6 +17,8 @@ class ProductsController extends AdminController
 
     public function __construct() {
         $this->storageUrl = Storage::url('products/');
+
+        $this->authorizeResource(Product::class, 'product');
     }
 
     /**
@@ -222,7 +224,7 @@ class ProductsController extends AdminController
     {
         $product = Product::with(['orders'])->find($id);
 
-        $this->authorize('delete', $product);
+        // $this->authorize('delete', $product);
 
         // if(auth()->user()->can('delete', $product)) {
             
