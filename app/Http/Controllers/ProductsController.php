@@ -18,7 +18,7 @@ class ProductsController extends AdminController
     public function __construct() {
         $this->storageUrl = Storage::url('products/');
 
-        $this->authorizeResource(Product::class, 'product');
+        // $this->authorizeResource(Product::class, 'product');
     }
 
     /**
