@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\NewCustomerAddedEvent;
+use App\Mail\WelcomeNewCustomerMail;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -10,6 +12,7 @@ use Intervention\Image\Facades\Image;
 use Config;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class CustomersController extends AdminController
 {
@@ -107,6 +110,8 @@ class CustomersController extends AdminController
 
             $customer->fill($input);
             $customer->save();
+
+            event(new NewCustomerAddedEvent($customer));
 
         } catch (\Throwable $th) {
             return redirect()->back()->with('error','New customer adding error 500');
